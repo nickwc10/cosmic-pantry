@@ -1,8 +1,35 @@
-header{
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    margin-left: 1rem;
+body {
+    background: linear-gradient(135deg, #0a0a1a 0%, #0d1b3e 50%, #1a0a2e 100%);
+    min-height: 100vh;
+    color: #e0e0e0;
 }
-body{
-    background-color: rgb(208, 208, 208);
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+header h2 {
+    font-size: 1rem;
+    color: #8aafd4;
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+hr {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.space-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+.space-card h2,
+.space-card h5 {
+    color: #ffffff;
 }
