@@ -33,3 +33,6 @@ hr {
 .space-card h5 {
     color: #ffffff;
 }
+input[type="date"] {
+    color-scheme: dark;
+}

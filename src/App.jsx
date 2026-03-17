@@ -6,7 +6,8 @@ import Recipe from './Recipe'
 
 
 const STOP_WORDS = ['the', 'a', 'an', 'of', 'in', 'and', 'or', 'is', 'at', 'by', 'for', 'with', 'near',     
-  'over', 'from', 'its', 'to', 'on', 'as']
+  'over', 'from', 'its', 'to', 'on', 'as', 'off','are']
+const today = new Date().toISOString().split("T")[0] // used to prevent date input past today
 
   function extractKeywords(title) {
     return title
@@ -17,21 +18,21 @@ const STOP_WORDS = ['the', 'a', 'an', 'of', 'in', 'and', 'or', 'is', 'at', 'by',
   }
 
 export default function App() {
+    const [date, setDate] = useState(today)
     const resultAPOD = useQuery({
-      queryKey: ['apod'],
+      queryKey: ['apod', date],
       queryFn: async () => {
-        const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}`)
+        const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}`)
         return res.json()
       }
     })
     const keywords = resultAPOD.data ? extractKeywords(resultAPOD.data.title) : []
-    console.log(keywords)
+    const descriptionKeywords = resultAPOD.data ? extractKeywords(resultAPOD.data.explanation) : []
     const resultMeal = useQuery({
-      queryKey: ['meal', keywords],
-      queryFn: () => searchMealByKeywords(keywords),
+      queryKey: ['meal', keywords, descriptionKeywords],
+      queryFn: () => searchMealByKeywords(keywords, descriptionKeywords),
       enabled: keywords.length > 0
     })
-    console.log(resultMeal)
 
   return (
     <>
@@ -41,8 +42,14 @@ export default function App() {
           <h2>Today's space inspired recipe</h2>
         </header>
         <hr></hr>
-        <ImageCard res={resultAPOD} />
-        <Recipe rec={resultMeal.data}/>
+        <div className='card space-card mb-3 p-3'>
+            <h3 className="card-title mb-3">About Cosmic Pantry</h3>
+            <p className="card-text mb-2">Every day, NASA publishes an <strong>Astronomy Photo of the Day (APOD)</strong> - a stunning image of the cosmos accompanied by a short description written by an astronomer.</p>
+            <p className="card-text mb-2">Cosmic Pantry uses the title and description of that photo to search for a matching recipe. Keywords are extracted and matched against The Meal Database, so if today's photo features the <em>Spanish Nebula</em> you might end up cooking something from that corner of the world.</p>
+            <p className="card-text mb-0">Come back each day for a new photo and a new recipe inspiration from across the universe. You can also select a past date if you want more inspiration!</p>
+        </div>
+        <ImageCard res={resultAPOD} date={date} onDateChange={setDate} />
+        <Recipe rec={resultMeal.data?.meal} matchedKeyword={resultMeal.data?.matchedKeyword} source={resultMeal.data?.source}/>
         </div>
     </>
     
@@ -50,16 +57,22 @@ export default function App() {
 }
 
 
-  async function searchMealByKeywords(keywords) {
+  async function searchMealByKeywords(keywords, descriptionKeywords = []) {
     for (const keyword of keywords) {
       const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${keyword}`)
       const data = await res.json()
-      if (data.meals) return data.meals[0]  // first match wins
+      if (data.meals) return { meal: data.meals[0], matchedKeyword: keyword, source: 'title' }
+    }
+    // fallback to description keywords
+    for (const keyword of descriptionKeywords) {
+      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${keyword}`)
+      const data = await res.json()
+      if (data.meals) return { meal: data.meals[0], matchedKeyword: keyword, source: 'description' }
     }
     // fallback to random
     const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php')
     const data = await res.json()
-    return data.meals[0]
+    return { meal: data.meals[0], matchedKeyword: null, source: 'random' }
   }
 
 

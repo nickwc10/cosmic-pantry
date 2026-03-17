@@ -1,46 +1,45 @@
 import {useState} from 'react'
 
-export default function Recipe({rec}){
-    if(!rec) return <div>Loading...</div>
+export default function Recipe({rec, matchedKeyword, source}){
+    if(!rec) return <div className="text-white-50 text-center py-4">Loading recipe...</div>
     const steps = rec.strInstructions.split(/\r\n|\n/).map(step=>step.replace(/^step\s*\d+[.:)]*\s*/i, '').trim()).filter(step=>step.trim() !=="")
+
+    const matchBadge = source === 'random'
+        ? <span className="badge bg-secondary">Random pick</span>
+        : <span className="badge bg-secondary">Matched on <strong>"{matchedKeyword}"</strong> from photo {source}</span>
 
     return(
         <>
-        <OverviewCard rec={rec}/>
-        <div className="card p-3 mb-3" id="recipe-card">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-                <h2 className="mb-0">Instructions</h2>
-                <div className="btn-group btn-group-sm">
-                    <button className="btn btn-outline-secondary">Normal</button>
-                    <button className="btn btn-outline-secondary">Pirate</button>
-                    <button className="btn btn-outline-secondary">Shakespeare</button>
-                </div>
+
+        <OverviewCard rec={rec} matchBadge={matchBadge}/>
+        <div className="card space-card mb-3 p-3">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">Instructions</h5>
             </div>
-            <div className="card-body"id="instruction-card">   
-                    <ol>
-                        {steps.map((step,i)=> <li key={i} className="mb-2">{step}</li>)}
-                    </ol>
-                </div>
+            <ol className="text-white-85">
+                {steps.map((step,i)=> <li key={i} className="mb-2">{step}</li>)}
+            </ol>
         </div>
         </>
     )
 }
 
-function OverviewCard({rec}){
+function OverviewCard({rec, matchBadge}){
     return (
-        <div className="card mb-3" id='overview-card'>
-            <div className="row g-0"> 
-                <div className="col-3 d-flex align-items-center ps-3">
-                    <div className="card rounded mx-auto mb-3" id="thumbnail">            
-                        <img src={rec.strMealThumb} className="card-img object-fit-scale" alt="..."style={{height: 'max-content', width: '100%'}}></img>
-                    </div>
+        <div className="card space-card mb-3">
+            <div className="row g-0">
+                <div className="col-3 d-flex align-items-center p-3">
+                    <img src={rec.strMealThumb} className="img-fluid rounded" alt={rec.strMeal}/>
                 </div>
                 <div className="col-9">
                     <div className="card-body">
-                        <h5 className="card-title text-center">Recipe Name: {rec.strMeal} </h5>
-                        <p className="card-text text-center"> <strong>Cuisine:</strong> {rec.strArea}</p>
+                        <div className="d-flex align-items-start justify-content-between gap-2 mb-1">
+                            <h5 className="card-title mb-0">{rec.strMeal}</h5>
+                            {matchBadge}
+                        </div>
+                        <p className="text-white-85 mb-3">{rec.strCategory} — {rec.strArea}</p>
+                        <Ingredients rec={rec}/>
                     </div>
-                    <Ingredients rec={rec}/>
                 </div>
             </div>
         </div>
@@ -48,21 +47,19 @@ function OverviewCard({rec}){
 }
 
 function Ingredients({rec}){
-    if(!rec) return <div>Loading...</div>
     const ingredients = Array.from({length: 20}, (_, i) => ({
-          ingredient: rec[`strIngredient${i+1}`],
-          measure: rec[`strMeasure${i+1}`]
-      })).filter(item => item.ingredient && item.ingredient.trim() !== '')        
-      return (
+        ingredient: rec[`strIngredient${i+1}`],
+        measure: rec[`strMeasure${i+1}`]
+    })).filter(item => item.ingredient && item.ingredient.trim() !== '')
 
-        <div className="card p-3 mb-3 text-bg-dark bg-opacity-50 rounded"id='ingredients-card'>
-            <h5>Ingredients</h5>
-                <ul className="list-unstyled">
-                    {ingredients.map((item, i) => (
-                        <li key={i}>{item.ingredient}: {item.measure}</li>
-                    ))}
-                 </ul>
-        </div>
-        )
+    return (
+        <>
+            <h6 className="text-white text-uppercase" style={{letterSpacing: '1px'}}>Ingredients</h6>
+            <ul className="list-unstyled row row-cols-2">
+                {ingredients.map((item, i) => (
+                    <li key={i} className="col text-white-85">○ {item.measure} {item.ingredient}</li>
+                ))}
+            </ul>
+        </>
+    )
 }
-
