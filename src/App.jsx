@@ -5,8 +5,26 @@ import ImageCard from './ImageCard'
 import Recipe from './Recipe'
 
 
-const STOP_WORDS = ['the', 'a', 'an', 'of', 'in', 'and', 'or', 'is', 'at', 'by', 'for', 'with', 'near',     
-  'over', 'from', 'its', 'to', 'on', 'as', 'off','are']
+const STOP_WORDS = [
+  // articles, prepositions, conjunctions
+  'the', 'a', 'an', 'of', 'in', 'and', 'or', 'is', 'at', 'by', 'for', 'with', 'near',
+  'over', 'from', 'its', 'to', 'on', 'as', 'off', 'are', 'how', 'was', 'full', 'can', 'then',
+  'into', 'out', 'up', 'down', 'about', 'above', 'below', 'between', 'around', 'through',
+  'across', 'along', 'among', 'within', 'without', 'toward', 'towards', 'upon', 'under',
+  'after', 'before', 'since', 'until', 'while', 'although', 'because', 'though', 'yet',
+  'but', 'nor', 'so', 'if', 'not', 'than', 'also', 'just', 'even', 'only', 'still',
+  // pronouns
+  'it', 'its', 'this', 'that', 'they', 'them', 'their', 'there', 'these', 'those',
+  'which', 'what', 'when', 'where', 'who', 'our', 'your', 'his', 'her', 'we', 'you',
+  'he', 'she', 'us', 'all', 'any', 'each', 'both', 'few', 'more', 'most', 'other',
+  'some', 'such', 'one', 'two', 'three', 'many', 'much', 'very',
+  // common verbs / auxiliaries
+  'be', 'been', 'being', 'have', 'has', 'had', 'will', 'would', 'could', 'should',
+  'may', 'might', 'do', 'did', 'does', 'get', 'got', 'let', 'make', 'made', 'use',
+  'used', 'see', 'seen', 'show', 'shown', 'take', 'taken', 'come', 'came', 'look',
+  'looks', 'appear', 'appears', 'known', 'called', 'named', 'located', 'captured',
+  'visible', 'found', 'lies', 'sits'
+]
 const today = new Date().toISOString().split("T")[0] // used to prevent date input past today
 
   function extractKeywords(title) {
@@ -59,18 +77,18 @@ export default function App() {
 
   async function searchMealByKeywords(keywords, descriptionKeywords = []) {
     for (const keyword of keywords) {
-      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${keyword}`)
+      const res = await fetch(`https://www.themealdb.com/api/json/v2/${import.meta.env.VITE_THE_MEAL_DB_API_KEY}/search.php?s=${keyword}`)
       const data = await res.json()
       if (data.meals) return { meal: data.meals[0], matchedKeyword: keyword, source: 'title' }
     }
     // fallback to description keywords
     for (const keyword of descriptionKeywords) {
-      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${keyword}`)
+      const res = await fetch(`https://www.themealdb.com/api/json/v2/${import.meta.env.VITE_THE_MEAL_DB_API_KEY}/search.php?s=${keyword}`)
       const data = await res.json()
       if (data.meals) return { meal: data.meals[0], matchedKeyword: keyword, source: 'description' }
     }
     // fallback to random
-    const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php')
+    const res = await fetch(`https://www.themealdb.com/api/json/v2/${import.meta.env.VITE_THE_MEAL_DB_API_KEY}/random.php`)
     const data = await res.json()
     return { meal: data.meals[0], matchedKeyword: null, source: 'random' }
   }
