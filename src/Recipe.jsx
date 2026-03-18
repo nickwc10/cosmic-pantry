@@ -2,9 +2,9 @@ import {useState} from 'react'
 
 export default function Recipe({rec, matchedKeyword, source}){
     if(!rec) return <div className="text-white-50 text-center py-4">Loading recipe...</div>
-    const steps = rec.strInstructions.split(/\r\n|\n/).map(step=>step.replace(/^step\s*\d+[.:)]*\s*/i, '').trim()).filter(step=>step.trim() !=="")
+    const steps = rec.strInstructions.split(/\r\n|\n/).map(step=>step.replace(/^step\s*\d+[.:)]*\s*/i, '').replace(/\d+[.]/i,'').trim()).filter(step=>step.trim() !=="")
 
-    const matchBadge = source === 'random'
+    const matchBadge = source === 'random' //generates the match badge and passes it to the overview card, probably not the most efficient
         ? <span className="badge bg-secondary">Random pick</span>
         : <span className="badge bg-secondary">Matched on <strong>"{matchedKeyword}"</strong> from photo {source}</span>
 
