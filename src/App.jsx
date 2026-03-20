@@ -41,11 +41,13 @@ export default function App() {
       queryKey: ['apod', date],
       queryFn: async () => {
         const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_API_KEY}&date=${date}`)
-        return res.json()
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error?.message ?? `Request failed (${res.status})`)
+        return data
       }
     })
-    const keywords = resultAPOD.data ? extractKeywords(resultAPOD.data.title) : []
-    const descriptionKeywords = resultAPOD.data ? extractKeywords(resultAPOD.data.explanation) : []
+    const keywords = resultAPOD.data?.title ? extractKeywords(resultAPOD.data.title) : []
+    const descriptionKeywords = resultAPOD.data?.explanation ? extractKeywords(resultAPOD.data.explanation) : []
     const resultMeal = useQuery({
       queryKey: ['meal', keywords, descriptionKeywords],
       queryFn: () => searchMealByKeywords(keywords, descriptionKeywords),
